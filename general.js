@@ -1,14 +1,26 @@
-public_users.get('/isbn/:isbn', function (req, res) {
-  const isbn = req.params.isbn;
-  axios.get(`http://localhost:8080/isbn/${isbn}`)
-    .then(response => res.status(200).json(response.data))
-    .catch(err => res.status(404).json({message: "Book not found"}));
-});
-public_users.get('/', async function (req, res) {
+public_users.get('/author/:author', async function (req, res) {
+  const authorName = req.params.author; // Lấy tham số author từ request
+
   try {
-    const response = await axios.get("http://localhost:8080/");
-    return res.status(200).json(response.data);
+    // Giả lập một Promise để truy xuất dữ liệu sách (hoặc dùng axios nếu gọi API ngoài)
+    const getBooksByAuthor = new Promise((resolve, reject) => {
+      const allBooks = Object.values(books); // Chuyển đổi object books thành mảng
+      const filteredBooks = allBooks.filter(b => b.author.toLowerCase() === authorName.toLowerCase());
+      
+      if (filteredBooks.length > 0) {
+        resolve(filteredBooks);
+      } else {
+        reject({ status: 404, message: "Không tìm thấy sách của tác giả này" });
+      }
+    });
+
+    const result = await getBooksByAuthor;
+    // Trường hợp thành công: Trả về danh sách sách đã lọc
+    return res.status(200).json(result);
+
   } catch (error) {
-    res.status(500).json({message: "Error fetching book list"});
+    // Xử lý lỗi không tìm thấy (404) hoặc lỗi hệ thống (500)
+    const statusCode = error.status || 500;
+    return res.status(statusCode).json({ message: error.message || "Lỗi hệ thống khi truy xuất dữ liệu" });
   }
 });
