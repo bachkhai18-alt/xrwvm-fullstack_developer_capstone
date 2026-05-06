@@ -1,0 +1,14 @@
+public_users.get('/isbn/:isbn', function (req, res) {
+  const isbn = req.params.isbn;
+  axios.get(`http://localhost:8080/isbn/${isbn}`)
+    .then(response => res.status(200).json(response.data))
+    .catch(err => res.status(404).json({message: "Book not found"}));
+});
+public_users.get('/', async function (req, res) {
+  try {
+    const response = await axios.get("http://localhost:8080/");
+    return res.status(200).json(response.data);
+  } catch (error) {
+    res.status(500).json({message: "Error fetching book list"});
+  }
+});
